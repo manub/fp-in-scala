@@ -1,3 +1,5 @@
+package net.manub.fpinscala
+
 import scala.annotation.tailrec
 
 object Chapter2 {
