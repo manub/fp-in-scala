@@ -81,4 +81,15 @@ object List {
   def foldLeftUsingRight[A, B](as: List[A], z: B)(f: (B, A) => B): B =
     foldRight(reverse(as),z)((a, b) => f(b, a))
 
+  def append[A](a1: List[A], a2: List[A]): List[A] =
+    a1 match {
+      case Nil => a2
+      case Cons(h, t) => Cons(h, append(t, a2))
+    }
+
+  def appendViaFoldRight[A](a1: List[A], a2: List[A]): List[A] =
+    foldRight(a1, a2)((a, acc) => Cons(a, acc))
+
+  def concat[A](ls: List[List[A]]): List[A] =
+    foldRight(ls, Nil: List[A])(append)
 }
