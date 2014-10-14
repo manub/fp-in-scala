@@ -76,25 +76,9 @@ object List {
       case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
     }
 
-  def foldLeftUsingRight[A, B](as: List[A], z: B)(f: (B, A) => B): B = {
-    def inverse[A, B](f: (B, A) => B): (A, B) => B = {
-      (a, b) => f(b, a)
-    }
+  def reverse[A](as: List[A]) = foldLeft(as, List[A]())((h, acc) => Cons(acc, h))
 
-    as match {
-      case Nil => z
-      case Cons(x, xs) => foldRight(xs, f(z, x))(inverse(f))
-    }
-  }
+  def foldLeftUsingRight[A, B](as: List[A], z: B)(f: (B, A) => B): B =
+    foldRight(reverse(as),z)((a, b) => f(b, a))
 
-  def foldRightUsingLeft[A, B](as: List[A], z: B)(f: (A, B) => B): B = {
-    def inverse[A, B](f: (A, B) => B): (B, A) => B = {
-      (a, b) => f(b, a)
-    }
-
-    as match {
-      case Nil => z
-      case Cons(x, xs) => foldLeft(xs, inverse(f)(z, x))(inverse(f))
-    }
-  }
 }
