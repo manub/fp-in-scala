@@ -1,4 +1,4 @@
-package net.manub.fpinscala
+package net.manub.fpinscala.chapter4
 
 sealed trait Option[+A] {
 
@@ -40,15 +40,23 @@ object Chapter4 {
 
   def Try[A](a: => A): Option[A] = try Some(a) catch { case e: Exception => None }
 
-  // is this the right way? is it possible to do this without pattern matching?
   def map2[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] =
-    (a, b) match {
-      case (Some(x), Some(y)) => Some(f(x, y))
-      case _ => None
-    }
+    a flatMap (aa => b map (bb => f(aa, bb)))
 
-  def sequence[A](a: scala.List[Option[A]]): Option[scala.List[A]] =
-    Try(a map { elem => elem getOrElse(throw new Exception("!!!")) })
+  def sequence[A](a: List[Option[A]]): Option[List[A]] = a match {
+    case Nil => Some(Nil)
+    case head :: tail => head flatMap { hh => sequence(tail) map (hh :: _) }
+  }
 
+  def traverse_ms[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = sequence (a map f)
 
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = a match {
+    case Nil => Some(Nil)
+    case head :: tail => map2(f(head), traverse(tail)(f))(_ :: _)
+  }
+
+  def map2_for[A, B, C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = for {
+    aa <- a
+    bb <- b
+  } yield f(aa, bb)
 }
