@@ -31,12 +31,25 @@ sealed trait Stream[+A] {
     case _ => z
   }
 
-  def existsFoldRight(p: A => Boolean): Boolean = this.foldRight(false)((a, b) => p(a) || b)
+  def existsWithFoldRight(p: A => Boolean): Boolean = this.foldRight(false)((a, b) => p(a) || b)
 
   def forAll(p: A => Boolean): Boolean = this.foldRight(true)((a, b) => p(a) && b)
 
-  def takeWhileFolded(p: A => Boolean): Stream[A] =
+  def takeWhileWithFoldRight(p: A => Boolean): Stream[A] =
     this.foldRight(Stream.empty[A])((a, b) => if (p(a)) Stream.cons(a, b) else Stream.empty)
+
+  def headOptionWithFoldRight: Option[A] = this.foldRight(None: Option[A])((a, b) => Some(a))
+
+  def mapWithFoldRight[B](f: A => B): Stream[B] =
+    this.foldRight(Stream.empty[B])((a, b) => Stream.cons(f(a), b))
+
+  def filterWithFoldRight(p: A => Boolean): Stream[A] =
+    this.foldRight(Stream.empty[A])((a, b) => if (p(a)) Stream.cons(a, b) else b)
+
+  def appendWithFoldRight[B >: A](s: => Stream[B]): Stream[B] = ???
+
+  def flatMapWithFoldRight[B](f: A => Stream[B]): Stream[B] =
+    this.foldRight(Stream.empty[B])((a, b) => Stream.append(f(a), b))
 }
 
 case object Empty extends Stream[Nothing]
@@ -52,5 +65,10 @@ object Stream {
   def empty[A]: Stream[A] = Empty
 
   def apply[A](as: A*): Stream[A] = if (as.isEmpty) empty else cons(as.head, apply(as.tail: _*))
+
+  def append[A](a1: Stream[A], a2: Stream[A]): Stream[A] = a1 match {
+    case Empty => a2
+    case Cons(h, t) => Stream.cons(h(), append(t(), a2))
+  }
 
 }
