@@ -71,4 +71,13 @@ object Stream {
     case Cons(h, t) => Stream.cons(h(), append(t(), a2))
   }
 
+  def constant[A](a: A): Stream[A] = Stream.cons(a, constant(a))
+
+  def from(n: Int): Stream[Int] = Stream.cons(n, from(n+1))
+
+  def fibs: Stream[Int] = {
+    def fib(n1: Int, n2: Int): Stream[Int] = Stream.cons(n1, fib(n2, n1 + n2))
+
+    Stream.cons(0, fib(1, 1))
+  }
 }
