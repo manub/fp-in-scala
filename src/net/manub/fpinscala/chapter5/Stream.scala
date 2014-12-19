@@ -46,7 +46,7 @@ sealed trait Stream[+A] {
   def filterWithFoldRight(p: A => Boolean): Stream[A] =
     this.foldRight(Stream.empty[A])((a, b) => if (p(a)) Stream.cons(a, b) else b)
 
-  def appendWithFoldRight[B >: A](s: => Stream[B]): Stream[B] = ???
+  def appendWithFoldRight[B >: A](s: => Stream[B]): Stream[B] = foldRight(s)((h,t)=>Stream.cons(h,t))
 
   def flatMapWithFoldRight[B](f: A => Stream[B]): Stream[B] =
     this.foldRight(Stream.empty[B])((a, b) => Stream.append(f(a), b))
@@ -78,6 +78,21 @@ object Stream {
   def fibs: Stream[Int] = {
     def fib(n1: Int, n2: Int): Stream[Int] = Stream.cons(n1, fib(n2, n1 + n2))
 
-    Stream.cons(0, fib(1, 1))
+    fib(0, 1)
   }
+
+  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
+    f(z) match {
+      case None => empty
+      case Some((a, s)) => Stream.cons(a, unfold(s)(f))
+    }
+
+  def fibsWithUnfold: Stream[Int] = {
+    unfold((0, 1)){case (n1, n2) => Some(n1, (n2, n1 + n2))}
+  }
+
+  def fromWithUnfold(n: Int): Stream[Int] = {
+    unfold(n){case m => Some(m, m+1)}
+  }
+
 }
