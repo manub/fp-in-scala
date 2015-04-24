@@ -50,6 +50,12 @@ sealed trait Stream[+A] {
 
   def flatMapWithFoldRight[B](f: A => Stream[B]): Stream[B] =
     this.foldRight(Stream.empty[B])((a, b) => Stream.append(f(a), b))
+
+  def mapWithUnfold[B](f: A => B): Stream[B] = Stream.unfold(this){
+    case Cons(h, t) => Some(f(h()), t())
+    case Empty => None
+  }
+
 }
 
 case object Empty extends Stream[Nothing]
@@ -94,5 +100,11 @@ object Stream {
   def fromWithUnfold(n: Int): Stream[Int] = {
     unfold(n){case m => Some(m, m+1)}
   }
+
+  def constantWithUnfold[A](a: A): Stream[A] = {
+    unfold(a){case constant => Some(constant, constant)}
+  }
+
+  def ones: Stream[Int] = constantWithUnfold(1)
 
 }
