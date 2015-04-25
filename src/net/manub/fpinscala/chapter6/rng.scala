@@ -42,4 +42,12 @@ object Chapter6 {
     val (d3, r3) = nextDouble(r2)
     ((d1, d2, d3), r3)
   }
+
+  def ints(count: Int)(rng: RNG): (List[Int], RNG) =
+    if (count == 0) (Nil, rng)
+    else {
+      val (i, r) = rng.nextInt
+      val (list, r2) = ints(count - 1)(r)
+      (i :: list, r2)
+    }
 }
